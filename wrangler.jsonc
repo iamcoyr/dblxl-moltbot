@@ -38,7 +38,16 @@
       "class_name": "Sandbox",
       "image": "./Dockerfile",
       "instance_type": "standard-2",
-      "max_instances": 1,
+      "max_instances": 5,
+      "wrangler_ssh": {
+        "enabled": true,
+      },
+      "authorized_keys": [
+        {
+          "name": "mac-mini",
+          "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIACZtSxlppaAnEBpPFS+vNR6NjqkoTYae8keoUJ7CiIr",
+        },
+      ],
     },
   ],
   "durable_objects": {

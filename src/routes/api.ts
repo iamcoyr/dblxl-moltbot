@@ -250,12 +250,11 @@ adminApi.post('/storage/sync', async (c) => {
       });
     }
 
-    const status =
-      result.error?.includes('not configured')
-        ? 400
-        : result.error?.includes('no config file found')
-          ? 409
-          : 500;
+    const status = result.error?.includes('not configured')
+      ? 400
+      : result.error?.includes('no config file found')
+        ? 409
+        : 500;
     return c.json(
       {
         success: false,

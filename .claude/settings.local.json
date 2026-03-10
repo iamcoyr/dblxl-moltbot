@@ -1,0 +1,11 @@
+{
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "neon"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)"
+    ]
+  }
+}
