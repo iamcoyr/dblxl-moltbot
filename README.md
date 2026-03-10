@@ -6,7 +6,7 @@ Run [OpenClaw](https://github.com/openclaw/openclaw) (formerly Moltbot, formerly
 
 > **Experimental:** This is a proof of concept demonstrating that OpenClaw can run in Cloudflare Sandbox. It is not officially supported and may break without notice. Use at your own risk.
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/moltworker)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/iamcoyr/dblxl-moltbot)
 
 ## Requirements
 
@@ -21,20 +21,20 @@ The following Cloudflare features used by this project have free tiers:
 
 ## Container Cost Estimate
 
-This project uses a `standard-1` Cloudflare Container instance (1/2 vCPU, 4 GiB memory, 8 GB disk). Below are approximate monthly costs assuming the container runs 24/7, based on [Cloudflare Containers pricing](https://developers.cloudflare.com/containers/pricing/):
+This project uses a `standard-2` Cloudflare Container instance (1 vCPU, 8 GiB memory, 8 GB disk). Below are approximate monthly costs assuming the container runs 24/7, based on [Cloudflare Containers pricing](https://developers.cloudflare.com/containers/pricing/):
 
 | Resource | Provisioned | Monthly Usage | Included Free | Overage | Approx. Cost |
 |----------|-------------|---------------|---------------|---------|--------------|
-| Memory | 4 GiB | 2,920 GiB-hrs | 25 GiB-hrs | 2,895 GiB-hrs | ~$26/mo |
-| CPU (at ~10% utilization) | 1/2 vCPU | ~2,190 vCPU-min | 375 vCPU-min | ~1,815 vCPU-min | ~$2/mo |
-| Disk | 8 GB | 5,840 GB-hrs | 200 GB-hrs | 5,640 GB-hrs | ~$1.50/mo |
+| Memory | 8 GiB | 5,840 GiB-hrs | 25 GiB-hrs | 5,815 GiB-hrs | ~$52/mo |
+| CPU (at ~10% utilization) | 1 vCPU | ~4,380 vCPU-min | 375 vCPU-min | ~4,005 vCPU-min | ~$4/mo |
+| Disk | 8 GB | 5,840 GB-hrs | 200 GB-hrs | 5,640 GB-hrs | ~$1.70/mo |
 | Workers Paid plan | | | | | $5/mo |
-| **Total** | | | | | **~$34.50/mo** |
+| **Total** | | | | | **~$62.70/mo** |
 
 Notes:
 - CPU is billed on **active usage only**, not provisioned capacity. The 10% utilization estimate is a rough baseline for a lightly-used personal assistant; your actual cost will vary with usage.
 - Memory and disk are billed on **provisioned capacity** for the full time the container is running.
-- To reduce costs, configure `SANDBOX_SLEEP_AFTER` (e.g., `10m`) so the container sleeps when idle. A container that only runs 4 hours/day would cost roughly ~$5-6/mo in compute on top of the $5 plan fee.
+- To reduce costs, configure `SANDBOX_SLEEP_AFTER` (e.g., `10m`) so the container sleeps when idle. A container that only runs 4 hours/day would cost roughly ~$9-10/mo in compute on top of the $5 plan fee.
 - Network egress, Workers/Durable Objects requests, and logs are additional but typically minimal for personal use.
 - See the [instance types table](https://developers.cloudflare.com/containers/pricing/) for other options (e.g., `lite` at 256 MiB/$0.50/mo memory or `standard-4` at 12 GiB for heavier workloads).
 
@@ -107,7 +107,7 @@ To use the admin UI at `/_admin/` for device management, you need to:
 The easiest way to protect your worker is using the built-in Cloudflare Access integration for workers.dev:
 
 1. Go to the [Workers & Pages dashboard](https://dash.cloudflare.com/?to=/:account/workers-and-pages)
-2. Select your Worker (e.g., `moltbot-sandbox`)
+2. Select your Worker (e.g., `dblxl-moltbot`)
 3. In **Settings**, under **Domains & Routes**, in the `workers.dev` row, click the meatballs menu (`...`)
 4. Click **Enable Cloudflare Access**
 5. Copy the values shown in the dialog (you'll need the AUD tag later). **Note:** The "Manage Cloudflare Access" link in the dialog may 404 — ignore it.
@@ -145,7 +145,7 @@ If you prefer more control, you can manually create an Access application:
 1. Go to [Cloudflare Zero Trust Dashboard](https://one.dash.cloudflare.com/)
 2. Navigate to **Access** > **Applications**
 3. Create a new **Self-hosted** application
-4. Set the application domain to your Worker URL (e.g., `moltbot-sandbox.your-subdomain.workers.dev`)
+4. Set the application domain to your Worker URL (e.g., `dblxl-moltbot.your-subdomain.workers.dev`)
 5. Add paths to protect: `/_admin/*`, `/api/*`, `/debug/*`
 6. Configure your desired identity providers (e.g., email OTP, Google, GitHub)
 7. Copy the **Application Audience (AUD)** tag and set the secrets as shown above
@@ -194,7 +194,7 @@ By default, moltbot data (configs, paired devices, conversation history) is lost
 1. Go to **R2** > **Overview** in the [Cloudflare Dashboard](https://dash.cloudflare.com/)
 2. Click **Manage R2 API Tokens**
 3. Create a new token with **Object Read & Write** permissions
-4. Select the `moltbot-data` bucket (created automatically on first deploy)
+4. Select the `dblxl-moltbot-data` bucket (created automatically on first deploy)
 5. Copy the **Access Key ID** and **Secret Access Key**
 
 ### 2. Set Secrets
@@ -473,7 +473,7 @@ OpenClaw in Cloudflare Sandbox uses multiple authentication layers:
 
 ### Windows: Gateway fails to start with exit code 126 (permission denied)
 
-On Windows, Git may check out shell scripts with CRLF line endings instead of LF. This causes `start-openclaw.sh` to fail with exit code 126 inside the Linux container. Ensure your repository uses LF line endings — configure Git with `git config --global core.autocrlf input` or add a `.gitattributes` file with `* text=auto eol=lf`. See [#64](https://github.com/cloudflare/moltworker/issues/64) for details.
+On Windows, Git may check out shell scripts with CRLF line endings instead of LF. This causes `start-openclaw.sh` to fail with exit code 126 inside the Linux container. Ensure your repository uses LF line endings — configure Git with `git config --global core.autocrlf input` or add a `.gitattributes` file with `* text=auto eol=lf`. See [#64](https://github.com/iamcoyr/dblxl-moltbot/issues/64) for details.
 
 ## Links
 
