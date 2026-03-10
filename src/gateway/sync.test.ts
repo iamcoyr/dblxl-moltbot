@@ -30,13 +30,33 @@ describe('syncToR2', () => {
       const { sandbox, execMock } = createMockSandbox();
       execMock
         .mockResolvedValueOnce(createMockExecResult('yes')) // rclone configured
-        .mockResolvedValueOnce(createMockExecResult('none')); // no config dir
+        .mockResolvedValueOnce(createMockExecResult('none')); // config dirs missing/empty
 
       const env = createMockEnvWithR2();
       const result = await syncToR2(sandbox, env);
 
       expect(result.success).toBe(false);
       expect(result.error).toBe('Sync aborted: no config file found');
+      expect(result.details).toContain('/root/.openclaw');
+    });
+
+    it('syncs when openclaw config directory has content', async () => {
+      const timestamp = '2026-01-27T12:00:00+00:00';
+      const { sandbox, execMock } = createMockSandbox();
+      execMock
+        .mockResolvedValueOnce(createMockExecResult('yes')) // rclone configured
+        .mockResolvedValueOnce(createMockExecResult('openclaw')) // non-empty config dir
+        .mockResolvedValueOnce(createMockExecResult()) // rclone sync config
+        .mockResolvedValueOnce(createMockExecResult()) // rclone sync workspace
+        .mockResolvedValueOnce(createMockExecResult()) // rclone sync skills
+        .mockResolvedValueOnce(createMockExecResult()) // date > last-sync
+        .mockResolvedValueOnce(createMockExecResult(timestamp)); // cat last-sync
+
+      const env = createMockEnvWithR2();
+      const result = await syncToR2(sandbox, env);
+
+      expect(result.success).toBe(true);
+      expect(result.lastSync).toBe(timestamp);
     });
   });
 
@@ -134,7 +154,7 @@ describe('syncToR2', () => {
       expect(configCmd).toContain('--transfers=16');
       expect(configCmd).toContain("--exclude='.git/**'");
       expect(configCmd).toContain('/root/.openclaw/');
-      expect(configCmd).toContain('r2:moltbot-data/openclaw/');
+      expect(configCmd).toContain('r2:dblxl-moltbot-data/openclaw/');
     });
 
     it('uses custom bucket name', async () => {

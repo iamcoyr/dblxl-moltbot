@@ -236,16 +236,26 @@ adminApi.get('/storage', async (c) => {
 adminApi.post('/storage/sync', async (c) => {
   const sandbox = c.get('sandbox');
 
-  const result = await syncToR2(sandbox, c.env);
+  try {
+    // Ensure gateway/config exist before manual sync.
+    await ensureMoltbotGateway(sandbox, c.env);
 
-  if (result.success) {
-    return c.json({
-      success: true,
-      message: 'Sync completed successfully',
-      lastSync: result.lastSync,
-    });
-  } else {
-    const status = result.error?.includes('not configured') ? 400 : 500;
+    const result = await syncToR2(sandbox, c.env);
+
+    if (result.success) {
+      return c.json({
+        success: true,
+        message: 'Sync completed successfully',
+        lastSync: result.lastSync,
+      });
+    }
+
+    const status =
+      result.error?.includes('not configured')
+        ? 400
+        : result.error?.includes('no config file found')
+          ? 409
+          : 500;
     return c.json(
       {
         success: false,
@@ -254,6 +264,9 @@ adminApi.post('/storage/sync', async (c) => {
       },
       status,
     );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return c.json({ success: false, error: errorMessage }, 500);
   }
 });
 

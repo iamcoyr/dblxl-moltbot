@@ -22,8 +22,9 @@ function rcloneRemote(env: MoltbotEnv, prefix: string): string {
  */
 async function detectConfigDir(sandbox: Sandbox): Promise<string | null> {
   const check = await sandbox.exec(
-    'test -f /root/.openclaw/openclaw.json && echo openclaw || ' +
-      '(test -f /root/.clawdbot/clawdbot.json && echo clawdbot || echo none)',
+    '([ -d /root/.openclaw ] && [ "$(ls -A /root/.openclaw 2>/dev/null | wc -l)" -gt 0 ] && echo openclaw) || ' +
+      '([ -d /root/.clawdbot ] && [ "$(ls -A /root/.clawdbot 2>/dev/null | wc -l)" -gt 0 ] && echo clawdbot) || ' +
+      'echo none',
   );
   const result = check.stdout?.trim();
   if (result === 'openclaw') return '/root/.openclaw';
@@ -45,7 +46,7 @@ export async function syncToR2(sandbox: Sandbox, env: MoltbotEnv): Promise<SyncR
     return {
       success: false,
       error: 'Sync aborted: no config file found',
-      details: 'Neither openclaw.json nor clawdbot.json found in config directory.',
+      details: 'Both /root/.openclaw and /root/.clawdbot are missing or empty.',
     };
   }
 
